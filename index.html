@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summer 2027 Internship Tracker</title>
+</head>
+<body>
+<style>
+  :root {
+    --paper: #eef1f0;
+    --paper-panel: #ffffff;
+    --ink: #17232c;
+    --ink-soft: #45565f;
+    --line: #2f6690;
+    --line-soft: #a9c3d1;
+    --border: #c9d4d8;
+    --warn: #a6631f;
+    --warn-bg: #f8ecd9;
+    --good: #2f6b4b;
+    --good-bg: #e2f0e7;
+    --muted: #6f7d84;
+    --muted-bg: #e7eaea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #101d29;
+      --paper-panel: #16283a;
+      --ink: #dfe9ef;
+      --ink-soft: #9fb3bf;
+      --line: #6fb3d8;
+      --line-soft: #2a4256;
+      --border: #2c4356;
+      --warn: #e2a24d;
+      --warn-bg: #3a2c17;
+      --good: #6fbf98;
+      --good-bg: #1a3327;
+      --muted: #7d8d97;
+      --muted-bg: #1c2b36;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #101d29;
+    --paper-panel: #16283a;
+    --ink: #dfe9ef;
+    --ink-soft: #9fb3bf;
+    --line: #6fb3d8;
+    --line-soft: #2a4256;
+    --border: #2c4356;
+    --warn: #e2a24d;
+    --warn-bg: #3a2c17;
+    --good: #6fbf98;
+    --good-bg: #1a3327;
+    --muted: #7d8d97;
+    --muted-bg: #1c2b36;
+  }
+  :root[data-theme="light"] {
+    --paper: #eef1f0;
+    --paper-panel: #ffffff;
+    --ink: #17232c;
+    --ink-soft: #45565f;
+    --line: #2f6690;
+    --line-soft: #a9c3d1;
+    --border: #c9d4d8;
+    --warn: #a6631f;
+    --warn-bg: #f8ecd9;
+    --good: #2f6b4b;
+    --good-bg: #e2f0e7;
+    --muted: #6f7d84;
+    --muted-bg: #e7eaea;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  }
+  .label {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--line);
+  }
+
+  /* Title block, drafting-sheet style */
+  .titleblock {
+    border: 1.5px solid var(--line);
+    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .titleblock h1 {
+    grid-column: 1 / -1;
+    font-size: 1.6rem;
+    margin: 0 0 0.15rem;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+  .titleblock .sub { color: var(--ink-soft); font-size: 0.95rem; }
+  .titleblock .meta {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .titleblock .meta div + div { margin-top: 0.15rem; }
+  .titleblock .meta b { color: var(--ink); }
+
+  h2 {
+    font-size: 1.05rem;
+    margin: 2.4rem 0 0.2rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border);
+    text-wrap: balance;
+  }
+  h2 .label { display: block; margin-bottom: 0.2rem; }
+  p.intro { color: var(--ink-soft); font-size: 0.92rem; max-width: 65ch; margin: 0.6rem 0 1.2rem; }
+
+  /* Act-now cards */
+  .actgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 0.9rem;
+  }
+  .actcard {
+    background: var(--paper-panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warn);
+    padding: 0.9rem 1rem;
+  }
+  .actcard .co { font-weight: 600; font-size: 0.98rem; }
+  .actcard .deadline { font-family: ui-monospace, monospace; font-size: 0.82rem; color: var(--warn); margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+  .actcard p { font-size: 0.85rem; color: var(--ink-soft); margin: 0.45rem 0 0.55rem; }
+  .actcard a { font-size: 0.8rem; }
+
+  a { color: var(--line); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--line); outline-offset: 2px; }
+
+  .chip {
+    display: inline-block;
+    font-family: ui-monospace, monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .chip.live { background: var(--good-bg); color: var(--good); }
+  .chip.soon { background: var(--warn-bg); color: var(--warn); }
+  .chip.wait { background: var(--muted-bg); color: var(--muted); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85rem; min-width: 720px; }
+  thead th {
+    text-align: left;
+    font-family: ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    background: var(--paper-panel);
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--line-soft);
+    position: sticky;
+    top: 0;
+  }
+  tbody td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--paper-panel); }
+  td.co { font-weight: 600; }
+  td.cat { color: var(--ink-soft); font-size: 0.8rem; }
+  td.window { font-family: ui-monospace, monospace; font-size: 0.78rem; color: var(--ink-soft); }
+
+  .noteblock {
+    background: var(--paper-panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--line);
+    padding: 1rem 1.2rem;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+  }
+  .noteblock.flag { border-left-color: var(--warn); }
+  .noteblock p { margin: 0.4rem 0; }
+  .noteblock p:first-child { margin-top: 0; }
+  .noteblock p:last-child { margin-bottom: 0; }
+
+  ul.links { list-style: none; padding: 0; margin: 0.6rem 0 0; display: grid; gap: 0.4rem; }
+  ul.links li { font-size: 0.88rem; }
+  ul.links .desc { color: var(--ink-soft); }
+
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 0.8rem;
+  }
+  .strategy-grid .card {
+    border: 1px solid var(--border);
+    padding: 0.9rem 1rem;
+  }
+  .strategy-grid .card h3 { margin: 0 0 0.4rem; font-size: 0.9rem; }
+  .strategy-grid .card p { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+</style>
+
+<div class="titleblock">
+  <h1>Summer 2027 Internship Tracker</h1>
+  <div class="sub">Big-company internships for an Industrial Engineering major (CS minor) — rising junior</div>
+  <div class="meta">
+    <div><b>Compiled</b> 2026-08-02</div>
+    <div><b>Target term</b> Summer 2027</div>
+    <div><b>Scope</b> US-based, IE + tech roles</div>
+  </div>
+</div>
+
+<p class="intro">
+  Bottom line up front: Summer 2027 is about 10 months out, so most programs have <em>not</em> posted yet — but three deadlines below are real and close. Everything else is a timeline to revisit. Dates from company career pages were verified directly; dates sourced only from aggregator blogs (Extern, Simplify, etc.) are marked <span class="chip soon">unverified</span> and should be double-checked on the official site before treating them as fixed.
+</p>
+
+<h2><span class="label">01 — Do this week</span>Act Now</h2>
+<div class="actgrid">
+  <div class="actcard">
+    <div class="co">McKinsey &amp; Company</div>
+    <div class="deadline">Deadline: Aug 11, 2026</div>
+    <p>2027 Summer Business Analyst portal opened Jul 1, 2026. National deadline is <b>9 days from today</b>. This is exactly the junior-summer timing (rising senior at start) his class year fits.</p>
+    <a href="https://www.mckinsey.com/careers/search-jobs" target="_blank" rel="noopener">mckinsey.com/careers →</a>
+  </div>
+  <div class="actcard">
+    <div class="co">Amazon</div>
+    <div class="deadline">Live now — rolling</div>
+    <p>2027 SDE Intern and Operations/Finance Rotational postings are already live on Amazon's job board and reviewed on a rolling basis. Search "2027 intern" + location = United States.</p>
+    <a href="https://www.amazon.jobs/en/teams/internships-for-students" target="_blank" rel="noopener">amazon.jobs/internships →</a>
+  </div>
+  <div class="actcard">
+    <div class="co">Caterpillar</div>
+    <div class="deadline">Closes Aug 20, 2026</div>
+    <p>2027 Engineering Corporate Intern Program is open now (Peoria/Mossville, IL and other sites). Note: a few listed tracks require a prior Caterpillar internship — check each posting's eligibility line before applying.</p>
+    <a href="https://careers.caterpillar.com/en/students-graduates/interns-and-graduates/" target="_blank" rel="noopener">careers.caterpillar.com →</a>
+  </div>
+  <div class="actcard">
+    <div class="co">Walmart</div>
+    <div class="deadline">Opening ~early Aug 2026</div>
+    <p>Supply chain/field-ops internships for distribution and fulfillment centers open on a rolling basis starting right about now; reportedly 60-70% of interview slots are gone by mid-September, so early application matters here.</p>
+    <a href="https://careers.walmart.com/students" target="_blank" rel="noopener">careers.walmart.com/students →</a>
+  </div>
+</div>
+
+<h2><span class="label">02 — Read before applying</span>Notes Worth Knowing</h2>
+<div class="noteblock flag">
+  <p><b>Anthropic does not currently run a student internship program.</b> Confirmed directly on their careers FAQ: "We don't currently offer internships." Their only early-career-adjacent path is the Anthropic Fellows Program, a paid research fellowship aimed at more advanced researchers, not undergraduates. If the Claude/AI interest is the draw, the closer analogs at big companies are Google DeepMind, Microsoft AI, Meta AI, and NVIDIA's AI/robotics research tracks — all in the tracker below.</p>
+</div>
+<div class="noteblock">
+  <p><b>He's a genuine double fit — apply under both labels.</b> Companies split IE-flavored work into "Operations/Supply Chain" or "Manufacturing/Industrial Engineering" postings, separate from "Software Engineer" postings. With an IE major and CS minor he qualifies for both tracks at the same company (e.g., Amazon Ops vs. Amazon SDE) — worth applying to both rather than picking one.</p>
+</div>
+<div class="noteblock">
+  <p><b>MBB consulting (McKinsey/BCG/Bain) timing is genuinely confusing right now</b> — sources conflict on whether "2027" postings mean summer 2027 or the cycle after. McKinsey's Aug 11, 2026 deadline (above) is the one figure confirmed with a specific date. For BCG and Bain, go straight to their careers sites and search "Summer Associate Consultant Intern" rather than trusting a secondary date.</p>
+</div>
+
+<h2><span class="label">03 — Full list, revisit every 4-6 weeks</span>Company Timeline Tracker</h2>
+<p class="intro">Status reflects what was found on 2026-08-02. <span class="chip live">Live</span> = postings up now. <span class="chip soon">Opening soon</span> = expected within ~8 weeks based on this year's or last cycle's pattern. <span class="chip wait">Not yet</span> = no signal of an opening date yet.</p>
+<div class="tablewrap">
+<table>
+  <thead>
+    <tr><th>Company</th><th>Category</th><th>Status</th><th>Typical window</th><th>Careers link</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="co">Amazon</td><td class="cat">Tech (SDE) + Ops/Supply Chain</td><td><span class="chip live">Live</span></td><td class="window">Rolling, Jul 2026 →</td><td><a href="https://www.amazon.jobs/en/teams/internships-for-students">amazon.jobs</a></td></tr>
+    <tr><td class="co">Caterpillar</td><td class="cat">Engineering / Manufacturing / Supply Chain</td><td><span class="chip live">Live</span></td><td class="window">Eng: Jul 1 – Aug 20 '26; biz tracks → Feb '27</td><td><a href="https://careers.caterpillar.com/en/students-graduates/interns-and-graduates/">careers.caterpillar.com</a></td></tr>
+    <tr><td class="co">Walmart</td><td class="cat">Supply Chain / Field Ops</td><td><span class="chip live">Live</span></td><td class="window">Opens ~Aug '26, rolling</td><td><a href="https://careers.walmart.com/students">careers.walmart.com</a></td></tr>
+    <tr><td class="co">McKinsey</td><td class="cat">Consulting — Business Analyst</td><td><span class="chip live">Live</span></td><td class="window">Opened Jul 1, closes Aug 11 '26</td><td><a href="https://www.mckinsey.com/careers/search-jobs">mckinsey.com/careers</a></td></tr>
+    <tr><td class="co">Texas Instruments</td><td class="cat">Manufacturing / Process Engineering</td><td><span class="chip live">Live (some roles)</span></td><td class="window">Rolling</td><td><a href="https://careers.ti.com/">careers.ti.com</a></td></tr>
+    <tr><td class="co">Apple</td><td class="cat">Engineering + Ops (umbrella req)</td><td><span class="chip live">Live (umbrella)</span></td><td class="window">Oct '26 – Sep '27 window, rolling</td><td><a href="https://jobs.apple.com/en-us/search?team=internships-STDNT-INTRN">jobs.apple.com/students</a></td></tr>
+    <tr><td class="co">Google</td><td class="cat">Tech — SWE / STEP</td><td><span class="chip soon">Unverified — reported live</span></td><td class="window">SWE ~Jun-Jul; STEP deadline ~Oct 15 '26</td><td><a href="https://buildyourfuture.withgoogle.com/students">careers.google.com/students</a></td></tr>
+    <tr><td class="co">Microsoft</td><td class="cat">Tech — SWE / Explore / Discovery</td><td><span class="chip soon">Opening soon</span></td><td class="window">Expected mid-Aug '26</td><td><a href="https://careers.microsoft.com/students/">careers.microsoft.com/students</a></td></tr>
+    <tr><td class="co">Boeing</td><td class="cat">Industrial Eng / Ops / Business Intern</td><td><span class="chip soon">Opening soon</span></td><td class="window">~Aug-Oct '26, spring wave Feb-Mar '27</td><td><a href="https://jobs.boeing.com/students">jobs.boeing.com/students</a></td></tr>
+    <tr><td class="co">General Motors</td><td class="cat">Manufacturing / Industrial Engineering</td><td><span class="chip soon">Opening soon</span></td><td class="window">~Aug-Oct '26</td><td><a href="https://search-careers.gm.com/en/students/">gm.com/careers</a></td></tr>
+    <tr><td class="co">Ford</td><td class="cat">Manufacturing / Engineering / Supply Chain</td><td><span class="chip soon">Opening soon</span></td><td class="window">~Aug-Oct '26</td><td><a href="https://corporate.ford.com/careers/students.html">corporate.ford.com/careers</a></td></tr>
+    <tr><td class="co">Procter &amp; Gamble</td><td class="cat">Supply Chain / Industrial Engineering</td><td><span class="chip soon">Check now, rolling</span></td><td class="window">Rolling; some cohorts start Oct '26</td><td><a href="https://www.pgcareers.com/">pgcareers.com</a></td></tr>
+    <tr><td class="co">UPS</td><td class="cat">Industrial Engineering / Ops</td><td><span class="chip soon">Check now</span></td><td class="window">Rolling, posts late summer/fall</td><td><a href="https://www.jobs-ups.com/">jobs-ups.com</a></td></tr>
+    <tr><td class="co">FedEx</td><td class="cat">Supply Chain / Operations</td><td><span class="chip wait">Not yet</span></td><td class="window">Rolling, fall</td><td><a href="https://careers.fedex.com/">careers.fedex.com</a></td></tr>
+    <tr><td class="co">Honeywell</td><td class="cat">Engineering / Operations</td><td><span class="chip wait">Not yet confirmed</span></td><td class="window">~Aug-Oct '26 (industry pattern)</td><td><a href="https://careers.honeywell.com/us/en/students">careers.honeywell.com</a></td></tr>
+    <tr><td class="co">3M</td><td class="cat">Engineering / Supply Chain</td><td><span class="chip wait">Not yet confirmed</span></td><td class="window">~Aug-Oct '26 (industry pattern)</td><td><a href="https://www.3m.com/3M/en_US/careers-us/students/">3m.com/careers/students</a></td></tr>
+    <tr><td class="co">GE Aerospace / GE Vernova</td><td class="cat">Engineering / Operations</td><td><span class="chip wait">Not yet confirmed</span></td><td class="window">~Aug-Oct '26 (industry pattern)</td><td><a href="https://www.ge.com/careers/students">ge.com/careers/students</a></td></tr>
+    <tr><td class="co">Intel</td><td class="cat">Manufacturing / Process Engineering</td><td><span class="chip wait">Not yet confirmed</span></td><td class="window">Fall cycle</td><td><a href="https://jobs.intel.com/en/students-graduates">jobs.intel.com/students</a></td></tr>
+    <tr><td class="co">Lockheed Martin</td><td class="cat">Engineering (Aero/Mech/Elec; IE-adjacent)</td><td><span class="chip wait">Not yet</span></td><td class="window">Confirmed: "many more in August" '26</td><td><a href="https://www.lockheedmartin.com/en-us/careers/candidates/students-early-careers/internships.html">lockheedmartin.com/internships</a></td></tr>
+    <tr><td class="co">Meta</td><td class="cat">Tech — SWE / PE / Data</td><td><span class="chip wait">Not yet confirmed</span></td><td class="window">Historically Jul-Sep</td><td><a href="https://www.metacareers.com/careerprograms/students/">metacareers.com/students</a></td></tr>
+    <tr><td class="co">NVIDIA</td><td class="cat">Tech / AI / Hardware Research</td><td><span class="chip wait">Rolling, low volume now</span></td><td class="window">Fixed fall cycle + year-round</td><td><a href="https://www.nvidia.com/en-us/about-nvidia/careers/university-recruiting/">nvidia.com/university-recruiting</a></td></tr>
+    <tr><td class="co">Deloitte</td><td class="cat">Consulting — Ops / Advisory</td><td><span class="chip wait">Unclear, conflicting reports</span></td><td class="window">Verify directly</td><td><a href="https://apply.deloitte.com/">apply.deloitte.com</a></td></tr>
+    <tr><td class="co">Accenture</td><td class="cat">Consulting / Technology</td><td><span class="chip wait">Unclear, conflicting reports</span></td><td class="window">Verify directly</td><td><a href="https://www.accenture.com/us-en/careers/local/university-students">accenture.com/careers/students</a></td></tr>
+    <tr><td class="co">BCG</td><td class="cat">Consulting — Associate</td><td><span class="chip wait">Unclear, conflicting reports</span></td><td class="window">Verify directly</td><td><a href="https://careers.bcg.com/students">careers.bcg.com/students</a></td></tr>
+    <tr><td class="co">Bain</td><td class="cat">Consulting — Associate</td><td><span class="chip wait">Unclear, conflicting reports</span></td><td class="window">Round deadlines cited Mar &amp; Jul '26 — verify</td><td><a href="https://www.bain.com/careers/students/">bain.com/careers/students</a></td></tr>
+    <tr><td class="co">Target</td><td class="cat">Supply Chain / Ops</td><td><span class="chip wait">Not found — check directly</span></td><td class="window">Likely similar to Walmart's window</td><td><a href="https://corporate.target.com/careers/students">corporate.target.com/careers</a></td></tr>
+    <tr><td class="co">Anthropic</td><td class="cat">AI Research</td><td><span class="chip wait">No internship program</span></td><td class="window">Fellows Program only, rolling</td><td><a href="https://www.anthropic.com/careers">anthropic.com/careers</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="label">04 — Ongoing monitoring</span>Community Trackers Worth Bookmarking</h2>
+<p class="intro">For the tech-track roles specifically, these two crowdsourced GitHub lists are updated daily by students and tend to surface new postings faster than any single company's own page — good for him to check himself on a weekly cadence.</p>
+<ul class="links">
+  <li><a href="https://github.com/SimplifyJobs/Summer2027-Internships" target="_blank" rel="noopener">SimplifyJobs/Summer2027-Internships</a> — <span class="desc">maintained with Pitt CSC; SWE, data, AI/ML, quant, PM, hardware</span></li>
+  <li><a href="https://github.com/vanshb03/Summer2027-Internships" target="_blank" rel="noopener">vanshb03/Summer2027-Internships</a> — <span class="desc">maintained with CSCareers; similar tech-role coverage</span></li>
+</ul>
+
+<h2><span class="label">05 — Positioning</span>Strategy Notes for the IE + CS Combo</h2>
+<div class="strategy-grid">
+  <div class="card">
+    <h3>Lead with IE, mention CS as a differentiator</h3>
+    <p>For manufacturing/supply-chain roles (GM, Ford, P&G, Caterpillar, UPS), the CS minor is a resume differentiator — mention SQL/Python/data tooling in the application, but apply through the IE/Ops req, not the SWE one.</p>
+  </div>
+  <div class="card">
+    <h3>Amazon is the strongest single dual-fit</h3>
+    <p>Amazon is unusual in running large IE-adjacent Ops/Supply Chain internship classes alongside its SDE program at comparable scale — worth applying to both reqs there specifically.</p>
+  </div>
+  <div class="card">
+    <h3>Consulting ops practice as a stretch</h3>
+    <p>McKinsey/BCG/Bain and Deloitte/Accenture all run operations-focused case tracks that recruit IE majors directly, not just finance/econ students — the McKinsey deadline this week is the most concrete entry point.</p>
+  </div>
+  <div class="card">
+    <h3>Recheck the "not yet" rows monthly</h3>
+    <p>Most of the industrial/manufacturing rows above (Boeing, GM, Ford, Honeywell, 3M, GE, Lockheed) cluster around an August-October 2026 open window — a single monthly pass through this table from September through December should catch nearly all of them.</p>
+  </div>
+</div>
+
+<h2><span class="label">06 — School channel</span>Virginia Tech-Specific Resources</h2>
+<p class="intro">Yes — VT runs its own internship database separate from company career pages, plus the ISE department has an informal employer channel of its own. Both are worth setting up before the fall recruiting wave hits.</p>
+<div class="actgrid">
+  <div class="actcard" style="border-left-color: var(--line);">
+    <div class="co">Engineering Expo — Sept 15–17, 2026</div>
+    <div class="deadline" style="color: var(--line);">6 weeks out — prep resume now</div>
+    <p>Run by the Student Engineers' Council, this is one of the largest student-run career fairs in the country and draws big-company recruiters across every engineering major, not just CS. This lands right in the Wave-1/Wave-2 hiring window from the tracker above — worth having a finished resume and Handshake profile before it.</p>
+    <a href="https://www.sec.vt.edu/expo.html" target="_blank" rel="noopener">sec.vt.edu/expo →</a>
+  </div>
+  <div class="actcard" style="border-left-color: var(--line);">
+    <div class="co">Handshake (VT PID login)</div>
+    <div class="deadline" style="color: var(--line);">Set up profile now</div>
+    <p>Virginia Tech's institution-wide job/internship database, run by Career and Professional Development (CPD) at the Smith Career Center. This is where most of the big companies in the tracker above post VT-specific recruiting events, info sessions, and sometimes VT-only application pipelines — separate from applying cold on a company's public careers site.</p>
+    <a href="https://career.vt.edu/resources/handshake/" target="_blank" rel="noopener">career.vt.edu/handshake →</a>
+  </div>
+</div>
+<div class="noteblock">
+  <p><b>ISE department has its own informal pipeline, not a database.</b> The Grado Department of Industrial and Systems Engineering says employers contact the ISE academic advisor directly with internship openings throughout the year, which then get shared over the ISE undergraduate listserv. There's no searchable ISE-specific job board — the advice is to be subscribed to the listserv and to check in with the advisor directly, since some of these leads never get posted publicly.</p>
+</div>
+<div class="noteblock">
+  <p><b>His degree requires an approved internship — plan for this to double as a graduation requirement.</b> VT's ISE program requires a "Bridge Experience": at least 6 weeks of full-time (40 hr/week) co-op or internship, approved and documented through CPD's Cooperative Education & Internship Program (CEIP), which enrolls students in a 1-credit course tied to the placement. Any of the big-company internships in the tracker above would likely satisfy this — just route the paperwork through CPD/CEIP rather than treating it as a side activity.</p>
+</div>
+
+<h2><span class="label">07 — The longer play</span>Co-op Programs</h2>
+<p class="intro">A co-op is a different commitment than a single summer internship: multiple work terms (often alternating with school semesters) at the same company, which tends to convert to a return offer at a much higher rate. Several of the tracker companies run named co-op tracks separate from their summer-intern program.</p>
+<div class="tablewrap">
+<table>
+  <thead>
+    <tr><th>Company</th><th>Program</th><th>Structure</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="co">General Motors</td><td class="cat">EXCEL Co-op</td><td class="window">4-yr commitment, 8× 3-month rotations</td><td>An "IE Fall Co-op" posting was already up on GM's site — highest direct-fit signal found. <a href="https://search-careers.gm.com/en/students/">search-careers.gm.com</a></td></tr>
+    <tr><td class="co">Lockheed Martin</td><td class="cat">Co-op Program</td><td class="window">2-3 rotations, alternating semesters</td><td>Standard track applies via Lockheed's own site; the "Enhanced" version (interview once for all 3 rotations) is a named partnership with specific schools (e.g. Drexel) — unconfirmed whether VT has an equivalent, worth asking CPD. <a href="https://www.lockheedmartinjobs.com/search-jobs/co-op">lockheedmartinjobs.com</a></td></tr>
+    <tr><td class="co">Procter & Gamble</td><td class="cat">Supply Network Ops / Product Supply Engineering Co-op</td><td class="window">10-12 wks, keyed to school's co-op calendar</td><td>Directly matches an IE/supply-chain profile. <a href="https://www.pgcareers.com/">pgcareers.com</a></td></tr>
+    <tr><td class="co">Boeing</td><td class="cat">Engineering Co-op</td><td class="window">Rotational, alongside the internship track</td><td>IE co-ops have rotated across multiple business units (e.g. facilities layout, value stream mapping). <a href="https://jobs.boeing.com/internships">jobs.boeing.com</a></td></tr>
+    <tr><td class="co">Ford</td><td class="cat">Co-op Program</td><td class="window">Alternating terms</td><td>Ford requires an "established co-op relationship" between the company and the university — worth confirming with VT CPD whether that relationship exists before counting on it. <a href="https://corporate.ford.com/careers/students.html">corporate.ford.com</a></td></tr>
+    <tr><td class="co">Caterpillar</td><td class="cat">Engineering Rotational Development Program</td><td class="window">12-18 months</td><td>Not an undergrad co-op — this is a post-internship early-career program, restricted to candidates who already completed a Caterpillar internship/co-op/trainee role in the prior 24 months. Treat the 2027 summer internship as the entry point, not this.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="noteblock">
+  <p>All of the above route through VT's CEIP (see above) either way, so the co-op still gets documented on his transcript and can satisfy the ISE Bridge Experience requirement, same as a summer internship would.</p>
+</div>
+
+<h2><span class="label">08 — Funding</span>Scholarships</h2>
+<div class="tablewrap">
+<table>
+  <thead>
+    <tr><th>Source</th><th>Award</th><th>Fit / eligibility</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="co">IISE Council of Fellows Scholarship</td><td class="window">$4,000</td><td class="cat">Undergrad IE program, 3.4+ GPA, requires IISE student membership</td><td><span class="chip live">Open — nominate by Nov 15, apply by Feb 1</span></td></tr>
+    <tr><td class="co">IISE / CISE Undergraduate Scholarship</td><td class="window">$2,000</td><td class="cat">For an outstanding ISE research project, 3.4+ GPA</td><td><span class="chip live">Open, same cycle as above</span></td></tr>
+    <tr><td class="co">Boeing Scholars Program</td><td class="window">2-yr scholarship + guaranteed junior→senior summer internship</td><td class="cat">Explicitly includes Industrial &amp; Manufacturing Systems Engineering, 3.2+ GPA</td><td><span class="chip wait">Limited to Boeing partner schools (Embry-Riddle, WSU, HBCU network via TMCF) — Virginia Tech didn't turn up as a partner; confirm with Boeing recruiting or CPD before counting on it</span></td></tr>
+    <tr><td class="co">Lockheed Martin STEM Scholarship</td><td class="window">Up to $40,000 (renewable 3×)</td><td class="cat">Explicitly listed Industrial Engineering as eligible, need-based, underrepresented/underserved background</td><td><span class="chip wait">Not accepting new applicants — Lockheed closed the program after the 2024 cycle; only renewing existing scholars</span></td></tr>
+    <tr><td class="co">GM Foundation Scholarship</td><td class="window">Varies</td><td class="cat">Women in ABET-accredited engineering, 3.5+ GPA, automotive/manufacturing career interest</td><td><span class="chip soon">Check current cycle</span></td></tr>
+    <tr><td class="co">HSF / General Motors Scholarship</td><td class="window">$2,500</td><td class="cat">Hispanic/Latino students in engineering or business</td><td><span class="chip soon">Check current cycle</span></td></tr>
+    <tr><td class="co">GM Engineering Scholarship (Native American)</td><td class="window">Varies</td><td class="cat">Enrolled tribal member, 3.0+ GPA, preference to EE/IE/ME</td><td><span class="chip soon">Check current cycle</span></td></tr>
+    <tr><td class="co">VT ISE Department Excellence Fund</td><td class="window">Varies, need-based</td><td class="cat">ISE undergrads; apply directly through the department</td><td><span class="chip soon">Check with ISE department</span></td></tr>
+    <tr><td class="co">VT College of Engineering Scholarships</td><td class="window">Varies</td><td class="cat">General engineering scholarship pool, not all merit-only</td><td><span class="chip soon">Annual deadline: FAFSA + General Scholarship App by Jan 22</span></td></tr>
+    <tr><td class="co">Student Engineers' Council (SEC) Scholarship</td><td class="window">Varies</td><td class="cat">VT engineering undergrads, tied to SEC (same org that runs Engineering Expo)</td><td><span class="chip soon">Check sec.vt.edu for cycle</span></td></tr>
+  </tbody>
+</table>
+</div>
+<div class="noteblock flag">
+  <p>Two things worth flagging plainly: the <b>Lockheed Martin STEM Scholarship is currently closed to new applicants</b> (confirmed directly on Lockheed's page — don't spend time on it), and the <b>Boeing Scholars Program appears restricted to a specific list of partner schools that Virginia Tech isn't confirmed to be part of</b> — worth a direct email to Boeing university relations or VT CPD before assuming he's eligible. The GM-affiliated scholarships above are demographic-targeted (gender, ethnicity, tribal enrollment); listed here for completeness so you can judge fit yourselves.</p>
+</div>
+
+<h2><span class="label">09 — Before hitting submit</span>Resume Format</h2>
+<p class="intro">Short answer: yes, and one resume won't cover everything here — tech, industrial/manufacturing, and consulting recruiters read resumes differently enough that he should keep 2-3 tailored versions rather than one generic copy.</p>
+<div class="noteblock">
+  <p><b>Baseline, true for every version:</b> one page, reverse chronological, single-column with no tables/graphics/photo/text boxes (ATS parsers choke on multi-column layouts), quantified bullets with action verbs, Education section with major, minor, expected graduation, GPA, and relevant coursework.</p>
+</div>
+<div class="strategy-grid">
+  <div class="card">
+    <h3>Tech / SWE track (Amazon, Google, Microsoft, Meta, NVIDIA)</h3>
+    <p>Projects lead, not experience — for interns, personal/class projects <i>are</i> the experience. Group technical skills by category (Languages, Frameworks, Tools). Name real technologies and outcomes, never "developed a web application."</p>
+  </div>
+  <div class="card">
+    <h3>IE / Ops / Manufacturing track (GM, Ford, Boeing ops, Caterpillar, P&amp;G, UPS)</h3>
+    <p>Surface Excel, SQL, Minitab, and lean/Six Sigma vocabulary directly — Value Stream Mapping, 5S, Kaizen, Kanban, SMED. List in-progress coursework, not just completed classes, since ISE curriculum (statistics, ops research, ergonomics) is itself a qualification here.</p>
+  </div>
+  <div class="card">
+    <h3>Consulting track (McKinsey, BCG, Bain)</h3>
+    <p>Meaningfully different structure: Education comes first (even above experience), then Experience, then Leadership/Activities. Strictly one page — a second page is an auto-reject at all three firms, even for undergrads. Black-and-white only, zero color or graphics. Bullets follow Context-Action-Result with a % or $ figure, not a duty description. Given the McKinsey deadline above, this version needs to exist first if he's applying there.</p>
+  </div>
+  <div class="card">
+    <h3>Defense-adjacent roles (Boeing, Lockheed Martin)</h3>
+    <p>Not a format change so much as a line item: since these employers require U.S. Person status and don't sponsor visas, citizenship status is worth stating plainly (most students just note "U.S. Citizen"). If he ever holds an active or interim security clearance, that line goes directly under his name/contact info, ahead of everything else — not relevant yet, but worth knowing for later.</p>
+  </div>
+</div>
+<div class="noteblock">
+  <p><b>Concrete next step:</b> VT's CPD office provides <a href="https://career.vt.edu/channels/resume-cv/" target="_blank" rel="noopener">VMock</a>, a free 24/7 tool that scores a resume on Impact/Presentation/Competencies, checks ATS-compatibility, and can compare the resume against a specific job description — worth running each tailored version through before he applies, and faster than waiting for a human review appointment.</p>
+</div>
+
+<footer>
+  Compiled from official company career pages (verified directly where noted) and third-party recruiting-timeline sources as of 2026-08-02. Application windows shift year to year — treat "typical window" cells as a planning estimate, not a guarantee, and confirm against the official careers link before a deadline is treated as final.
+</footer>
+</body></html>
